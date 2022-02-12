@@ -1,6 +1,29 @@
 console.log("rodando metrics...")
 
-import { getAllProjects } from './strateegia-api.js';
+import { getAllProjects, getCommentsGroupedByQuestionReport } from './strateegia-api.js';
+
+const users = JSON.parse(localStorage.getItem("users"));
+const accessToken = localStorage.getItem("strateegiaAccessToken");
+let params = {
+  "qtd_questoes_respondidas": 0,
+  "qtd_questoes_totais": 0,
+
+  "qtd_comentarios_usuario": 0,
+  "qtd_comentarios_totais": 0,
+  "qtd_participantes": 0,
+
+  "total_agreements_user": 0,
+  "total_agreements": 0,
+
+  "bigger_amount_agreements_user": 0,
+  "average_agreements_per_comment": 0,
+
+  "total_inner_replies": 0,
+  "total_replies": 0,
+
+  "bigger_amount_inner_replies": 0,
+  "average_inner_replies_per_comment": 0,
+}
 
 async function testJsonPathWithStrateegiaAPI() {
 
@@ -13,29 +36,34 @@ async function testJsonPathWithStrateegiaAPI() {
 
 }
 
+async function gatherData(userId, divergencePointId) {
+  const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
+  params.qtd_questoes_totais = divPointReport.length;
+  console.log(params);
+}
 
 // https://github.com/ricarthlima/ms-strateegia-user-analysis/blob/10f7d91a744748e8f078f14f4320767415e9cd7a/ms_influential_users_rails/app/controllers/influential_users_controller.rb#L7
 async function calculateMetrics() {
-  const users = JSON.parse(localStorage.getItem("users"));
 
-  const qtd_questoes_respondidas = 0;
-  const qtd_questoes_totais = 0;
 
-  const qtd_comentarios_usuario = 0;
-  const qtd_comentarios_totais = 0;
-  const qtd_participantes = 0;
+  const qtd_questoes_respondidas = params.qtd_questoes_respondidas;
+  const qtd_questoes_totais = params.qtd_questoes_totais;
 
-  const total_agreements_user = 0;
-  const total_agreements = 0;
+  const qtd_comentarios_usuario = params.qtd_comentarios_usuario;
+  const qtd_comentarios_totais = params.qtd_comentarios_totais;
+  const qtd_participantes = params.qtd_participantes;
 
-  const bigger_amount_agreements_user = 0;
-  const average_agreements_per_comment = 0;
+  const total_agreements_user = params.total_agreements_user;
+  const total_agreements = params.total_agreements;
 
-  const total_inner_replies = 0;
-  const total_replies = 0;
+  const bigger_amount_agreements_user = params.bigger_amount_agreements_user;
+  const average_agreements_per_comment = params.average_agreements_per_comment;
 
-  const bigger_amount_inner_replies = 0;
-  const average_inner_replies_per_comment = 0;
+  const total_inner_replies = params.total_inner_replies;
+  const total_replies = params.total_replies;
+
+  const bigger_amount_inner_replies = params.bigger_amount_inner_replies;
+  const average_inner_replies_per_comment = params.average_inner_replies_per_comment;
 
   /*
   O cálculo da métrica de influência é baseado no trabalho: 
@@ -66,7 +94,7 @@ async function calculateMetrics() {
   Observações: O limitador de 3 é para evitar distorções no cálculo final. Isso implica que caso um usuário
   tenha comentado mais que 3 vezes mais que a média esperada, isso ainda será valorado como 3
   */
-  const f2 = min(3, (qtd_comentarios_usuario / qtd_comentarios_totais) * qtd_participantes);
+  const f2 = Math.min(3, (qtd_comentarios_usuario / qtd_comentarios_totais) * qtd_participantes);
 
   /*
   Métrica 1
@@ -151,6 +179,9 @@ async function calculateMetrics() {
 }
 
 
-// Execute functions
-// testJsonPathWithStrateegiaAPI();
-calculateMetrics();
+export function executeCalculations(userId, divPointId){
+  // Execute functions
+  // testJsonPathWithStrateegiaAPI();
+  gatherData(userId, divPointId);
+  calculateMetrics();
+}

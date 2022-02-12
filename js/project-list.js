@@ -1,4 +1,5 @@
 import { getAllProjects, getProjectById, getAllDivergencePointsByMapId } from "./strateegia-api.js";
+import { executeCalculations } from "./metrics.js";
 
 let users = [];
 const accessToken = localStorage.getItem("strateegiaAccessToken");
@@ -63,6 +64,7 @@ async function updateMapList(selectedProject) {
             let selectedMap = d3.select("#maps-list").property('value');
             localStorage.setItem("selectedMap", selectedMap);
             console.log(selectedMap);
+            executeCalculations();
         })
         .selectAll("option")
         .data(project.maps, d => d.id);
@@ -77,4 +79,5 @@ async function updateMapList(selectedProject) {
     localStorage.setItem("selectedMap", project.maps[0].id);
     const map = await getAllDivergencePointsByMapId(accessToken, project.maps[0].id);
     console.log(map.content);
+    executeCalculations(users[0].id, map.content[0].id);
 }
