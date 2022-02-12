@@ -55,6 +55,8 @@ async function updateMapList(selectedProject) {
     project.users.forEach(user => {
         users.push({ id: user.id, name: user.name });
     });
+    // localStorage.removeItem("users");
+    localStorage.setItem("users", JSON.stringify(users));
     let options = d3.select("#maps-list")
         .on("change", () => {
             // Print the selected map id
