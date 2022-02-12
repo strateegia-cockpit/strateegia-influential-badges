@@ -15,7 +15,6 @@ export async function initializeProjectList() {
         }
         for (let j = 0; j < currentLab.projects.length; j++) {
             const project = currentLab.projects[j];
-            console.log(`${currentLab.lab.name} -> ${project.title}`);
             const newProject = {
                 "id": project.id,
                 "title": project.title,
@@ -56,8 +55,6 @@ async function updateMapList(selectedProject) {
     project.users.forEach(user => {
         users.push({ id: user.id, name: user.name });
     });
-    console.log("project.maps");
-    console.log(project.maps);
     let options = d3.select("#maps-list")
         .on("change", () => {
             // Print the selected map id

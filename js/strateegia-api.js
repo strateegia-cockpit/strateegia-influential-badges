@@ -79,7 +79,7 @@ export async function getMapById(token, map_id) {
 
 export async function getDivergencePointById(token, content_id) {
 
-    const response = await fetch(`${API_URL_PROJECTS}divergence-point/${content_id}`, {
+    const response = await fetch(`${API_URL_PROJECTS}divergence-point/${content_id}?size=5000`, {
         method: 'get',
         headers: {
             'Content-Type': 'application/json',
