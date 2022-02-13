@@ -1,6 +1,6 @@
 console.log("rodando metrics...")
 
-import { getAllProjects, getCommentsGroupedByQuestionReport } from './strateegia-api.js';
+import { getAllProjects, getCommentEngagementByContent, getCommentsGroupedByQuestionReport } from './strateegia-api.js';
 
 const users = JSON.parse(localStorage.getItem("users"));
 const accessToken = localStorage.getItem("strateegiaAccessToken");
@@ -31,20 +31,24 @@ async function testJsonPathWithStrateegiaAPI() {
   console.log("getAllProjects()");
   console.log(project);
 
-  const result = JSONPath.JSONPath({ path: '$..lab', json: project });
+  const result = JSONPath.JSONPath({ path: `$..comments[?(@.author.id == '${userId}')]`, json: project });
   console.log(result);
 
 }
 
-async function gatherData(userId, divergencePointId) {
+async function gatherData(projectId, userId, divergencePointId) {
   const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
+  const commentEngagementByContent = await getCommentEngagementByContent(accessToken, projectId);
   params.qtd_questoes_totais = divPointReport.length;
+  params.qtd_questoes_respondidas = JSONPath.JSONPath({ path: `$..comments[?(@.author.id == '${userId}')]`, json: divPointReport }).length;
+  params.qtd_comentarios_totais = JSONPath.JSONPath({ path: `$..comments..reply_count`, json: divPointReport }).reduce((partialSum, a) => partialSum + a, 0);
+  params.qtd_comentarios_usuario = JSONPath.JSONPath({ path: `$..comments..replies[?(@.author.id == '${userId}')]`, json: divPointReport }).length;
+  params.qtd_participantes = users.length;
   console.log(params);
 }
 
 // https://github.com/ricarthlima/ms-strateegia-user-analysis/blob/10f7d91a744748e8f078f14f4320767415e9cd7a/ms_influential_users_rails/app/controllers/influential_users_controller.rb#L7
 async function calculateMetrics() {
-
 
   const qtd_questoes_respondidas = params.qtd_questoes_respondidas;
   const qtd_questoes_totais = params.qtd_questoes_totais;
@@ -127,8 +131,8 @@ async function calculateMetrics() {
   Valor esperado para usuário influente: Entre 0,76 e 1,25
   Observação: O objetivo dessa função é valorizar caso o usuário tenha criado uma resposta que destoa completamente do número das outras, com uma quantidade massiva de agreements (limitadas a até 5 vezes a média de agreements por comentário).
    */
-  const relativeCalculation = (_bigger_amout_x_user, _average_x_per_comment) => {
-    const preF4 = _bigger_amout_x_user / _average_x_per_comment;
+  const relativeCalculation = (_bigger_amount_x_user, _average_x_per_comment) => {
+    const preF4 = _bigger_amount_x_user / _average_x_per_comment;
     let result = 0
     if (preF4 > 5) {
       result = 1.25;
@@ -179,9 +183,10 @@ async function calculateMetrics() {
 }
 
 
-export function executeCalculations(userId, divPointId){
+export function executeCalculations(projectId, userId, divergencePointId){
   // Execute functions
   // testJsonPathWithStrateegiaAPI();
-  gatherData(userId, divPointId);
+  gatherData(projectId, userId, divergencePointId);
   calculateMetrics();
+  return params;
 }

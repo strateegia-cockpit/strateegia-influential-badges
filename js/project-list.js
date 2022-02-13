@@ -76,8 +76,49 @@ async function updateMapList(selectedProject) {
         .attr("value", (d) => { return d.id })
         .text((d) => { return d.title });
     options.exit().remove();
-    localStorage.setItem("selectedMap", project.maps[0].id);
-    const map = await getAllDivergencePointsByMapId(accessToken, project.maps[0].id);
-    console.log(map.content);
-    executeCalculations(users[0].id, map.content[0].id);
+    const mapId = project.maps[0].id;
+    localStorage.setItem("selectedMap", mapId);
+    updateToolList(mapId);
+    // const map = await getAllDivergencePointsByMapId(accessToken, project.maps[0].id);
+    // console.log(map.content);
+}
+
+async function updateToolList(selectedMap) {
+    getAllDivergencePointsByMapId(accessToken, selectedMap).then(map => {
+        console.log("getAllDivergencePointsByMapId()");
+        console.log(map);
+        /* 
+           Remember that the kit Id is the generic kit! 
+           The content Id is the instance of that kit in the map
+           In this function, we are only interested in the instance of the kit
+         */
+
+        let options = d3.select("#tools-list")
+            .on("change", () => {
+                // Print the selected kit id
+                let selectedTool = d3.select("#tools-list").property("value");
+                setSelectedTool(selectedTool);
+            })
+            .selectAll("option")
+            .data(map.content, d => d.id);
+        options.enter()
+            .append("option")
+            .attr("value", (d) => { return d.id })
+            .text((d) => { return d.tool.title });
+        options.append("option")
+            .attr("value", (d) => { return d.id })
+            .text((d) => { return d.tool.title });
+        options.exit().remove();
+        let initialSelectedTool = map.content[0].id;
+        setSelectedTool(initialSelectedTool);
+    });
+}
+
+function setSelectedTool(toolId) {
+    localStorage.setItem("selectedTool", toolId);
+    const selectedProject = localStorage.getItem("selectedProject");
+    const selectedMap = localStorage.getItem("selectedMap");
+    const params = executeCalculations(selectedProject, '601accdc999f4a51b47056b1', toolId);
+    d3.select("#params").text(JSON.stringify(params, undefined, "\t"));
+    //buildDivergencePointStructure(localStorage.getItem("selectedTool"));
 }
