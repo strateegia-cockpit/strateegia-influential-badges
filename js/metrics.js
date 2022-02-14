@@ -59,7 +59,7 @@ async function gatherData(projectId, userId, divergencePointId) {
 
 }
 
-async function getDivPointReport(divergencePointId){
+async function getDivPointReport(divergencePointId) {
   const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
   return divPointReport;
 }
@@ -128,6 +128,20 @@ async function getKitData(divPointReport, authorsData) {
 // https://github.com/ricarthlima/ms-strateegia-user-analysis/blob/10f7d91a744748e8f078f14f4320767415e9cd7a/ms_influential_users_rails/app/controllers/influential_users_controller.rb#L7
 function calculateAuthorScore(author, kitData) {
 
+  let authorScore = {
+    id: author.id,
+    name: author.name,
+    f1: 0,
+    f2: 0,
+    f3: 0,
+    f4: 0,
+    f5: 0,
+    f6: 0,
+    metrica1: 0,
+    metrica2: 0,
+    score: 0
+  };
+
   const qtd_questoes_respondidas = author.amount_ans_questions;
   const qtd_questoes_totais = kitData.amount_questions;
 
@@ -167,8 +181,11 @@ function calculateAuthorScore(author, kitData) {
   Valor esperado para usuário influente: Entre 0,75 e 1
   Observação: Não importa quantos comentários ele fez nessa resposta
  */
-  const f1 = qtd_questoes_respondidas / qtd_questoes_totais;
-
+  let f1 = 0;
+  if (qtd_questoes_totais > 0) {
+    f1 = qtd_questoes_respondidas / qtd_questoes_totais;
+  }
+  
   /*
   (f2) Termos Relativos
   Valor máximo: 3;
@@ -197,8 +214,10 @@ function calculateAuthorScore(author, kitData) {
   Valor máximo: 1
   Valor esperado para usuário influente: Entre 0,1 e 0,5
   */
-  const f3 = total_agreements_user / total_agreements;
-
+  let f3 = 0;
+  if (total_agreements > 0) {
+    f3 = total_agreements_user / total_agreements;
+  }
   /*
   (f4) Agreements Relativos
     > 5 -> 1,25
@@ -235,7 +254,7 @@ function calculateAuthorScore(author, kitData) {
 
   let f5 = 0;
 
-  if(total_replies != 0){
+  if (total_replies != 0) {
     f5 = total_inner_replies / total_replies;
   }
 
@@ -261,8 +280,18 @@ function calculateAuthorScore(author, kitData) {
   A média ponderada (peso da métrica 2 está implícito pelo fato de haver uma soma de duas sub-métricas que equivalem sozinhas a métrica 1) é em função de acreditarmos que o engajamento gerado pelas respostas do usuário é ainda mais importante do que a quantidade de comentários feitas pelo mesmo.
   */
   const formulaFinal = ((metrica1) + (metrica2)) / 3;
+  
+  authorScore.f1 = f1.toFixed(2);
+  authorScore.f2 = f2.toFixed(2);
+  authorScore.f3 = f3.toFixed(2);
+  authorScore.f4 = f4.toFixed(2);
+  authorScore.f5 = f5.toFixed(2);
+  authorScore.f6 = f6.toFixed(2);
+  authorScore.metrica1 = metrica1.toFixed(2);
+  authorScore.metrica2 = metrica2.toFixed(2);
+  authorScore.score = formulaFinal.toFixed(2);
 
-  return formulaFinal;
+  return authorScore;
 }
 
 
@@ -273,13 +302,16 @@ export async function executeCalculations(projectId, userId, divergencePointId) 
   const divPointReport = await getDivPointReport(divergencePointId)
   const authorsData = await getAuthorsData(divPointReport);
   const kitData = await getKitData(divPointReport, authorsData);
+  const authorsScores = [];
   authorsData.forEach(author => {
-    author.score = calculateAuthorScore(author, kitData).toFixed(2);
+    authorsScores.push(calculateAuthorScore(author, kitData));
   });
-  const authorsDataSorted = authorsData.sort((a, b) => b.score - a.score); 
+  const authorsScoresSorted = authorsScores.sort((a, b) => b.score - a.score);
   console.log(authorsData);
-  let columns = ["name", "score"]//Object.keys(authorsData[0]);
-  tabulate(authorsData, columns);
+  let columns = Object.keys(authorsScoresSorted[0]);
+  columns.splice(columns.indexOf('id'), 1);
+  // let columns = ["name", "f1", "score"]//Object.keys(authorsData[0]);
+  tabulate(authorsScoresSorted, columns);
   console.log(kitData);
   return params;
 }
