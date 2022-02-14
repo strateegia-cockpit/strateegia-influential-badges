@@ -64,3 +64,12 @@ export function tabulate(data, columns) {
 
   return table;
 }
+
+export function updateOptionsList(htmlElement, inputData){
+  let options = d3.select(htmlElement);
+  options.selectAll('option').remove();
+  inputData.forEach(function (row) { 
+    options.append('option').attr('value', row.id).text(row.title);
+  });
+  options.on("change", () => {});
+}

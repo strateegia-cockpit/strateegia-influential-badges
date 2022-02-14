@@ -185,7 +185,7 @@ function calculateAuthorScore(author, kitData) {
   if (qtd_questoes_totais > 0) {
     f1 = qtd_questoes_respondidas / qtd_questoes_totais;
   }
-  
+
   /*
   (f2) Termos Relativos
   Valor máximo: 3;
@@ -280,7 +280,7 @@ function calculateAuthorScore(author, kitData) {
   A média ponderada (peso da métrica 2 está implícito pelo fato de haver uma soma de duas sub-métricas que equivalem sozinhas a métrica 1) é em função de acreditarmos que o engajamento gerado pelas respostas do usuário é ainda mais importante do que a quantidade de comentários feitas pelo mesmo.
   */
   const formulaFinal = ((metrica1) + (metrica2)) / 3;
-  
+
   authorScore.f1 = f1.toFixed(2);
   authorScore.f2 = f2.toFixed(2);
   authorScore.f3 = f3.toFixed(2);
@@ -295,11 +295,11 @@ function calculateAuthorScore(author, kitData) {
 }
 
 
-export async function executeCalculations(projectId, userId, divergencePointId) {
+export async function executeCalculations(divergencePointId) {
   // Execute functions
   // testJsonPathWithStrateegiaAPI();
-  gatherData(projectId, userId, divergencePointId);
-  const divPointReport = await getDivPointReport(divergencePointId)
+  // gatherData(projectId, userId, divergencePointId);
+  const divPointReport = await getDivPointReport(divergencePointId);
   const authorsData = await getAuthorsData(divPointReport);
   const kitData = await getKitData(divPointReport, authorsData);
   const authorsScores = [];
@@ -308,10 +308,5 @@ export async function executeCalculations(projectId, userId, divergencePointId) 
   });
   const authorsScoresSorted = authorsScores.sort((a, b) => b.score - a.score);
   console.log(authorsData);
-  let columns = Object.keys(authorsScoresSorted[0]);
-  columns.splice(columns.indexOf('id'), 1);
-  // let columns = ["name", "f1", "score"]//Object.keys(authorsData[0]);
-  tabulate(authorsScoresSorted, columns);
-  console.log(kitData);
-  return params;
+  return authorsScoresSorted;
 }
