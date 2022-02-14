@@ -1,5 +1,6 @@
 import { getAllProjects, getProjectById, getAllDivergencePointsByMapId } from "./strateegia-api.js";
 import { executeCalculations } from "./metrics.js";
+import { tabulate } from "./d3functions.js";
 
 let users = [];
 const accessToken = localStorage.getItem("strateegiaAccessToken");
@@ -44,6 +45,7 @@ export async function initializeProjectList() {
         .attr("value", (d) => { return d.id })
         .text((d) => { return `${d.lab_title} -> ${d.title}` });
     options.exit().remove();
+
     localStorage.setItem("selectedProject", listProjects[0].id);
     updateMapList(listProjects[0].id);
 }
@@ -58,13 +60,15 @@ async function updateMapList(selectedProject) {
     });
     // localStorage.removeItem("users");
     localStorage.setItem("users", JSON.stringify(users));
+
     let options = d3.select("#maps-list")
         .on("change", () => {
             // Print the selected map id
             let selectedMap = d3.select("#maps-list").property('value');
             localStorage.setItem("selectedMap", selectedMap);
             console.log(selectedMap);
-            executeCalculations();
+            updateDivPointList(selectedMap);
+            // executeCalculations();
         })
         .selectAll("option")
         .data(project.maps, d => d.id);
@@ -76,49 +80,52 @@ async function updateMapList(selectedProject) {
         .attr("value", (d) => { return d.id })
         .text((d) => { return d.title });
     options.exit().remove();
+
     const mapId = project.maps[0].id;
     localStorage.setItem("selectedMap", mapId);
-    updateToolList(mapId);
+
+    updateDivPointList(mapId);
     // const map = await getAllDivergencePointsByMapId(accessToken, project.maps[0].id);
     // console.log(map.content);
 }
 
-async function updateToolList(selectedMap) {
+async function updateDivPointList(selectedMap) {
     getAllDivergencePointsByMapId(accessToken, selectedMap).then(map => {
         console.log("getAllDivergencePointsByMapId()");
         console.log(map);
-        /* 
-           Remember that the kit Id is the generic kit! 
-           The content Id is the instance of that kit in the map
-           In this function, we are only interested in the instance of the kit
-         */
+        let options = d3.select("#divpoints-list");
+        options.selectAll("option").remove();
+        if (map.content.length > 0) {
+            map.content.forEach(function (divPoint) {
+                options.append("option").attr("value", divPoint.id).text(divPoint.tool.title);
+            });
+            options.on("change", () => {
+                let selectedDivPoint = d3.select("#divpoints-list").property("value");
+                setSelectedDivPoint(selectedDivPoint);
+            });
 
-        let options = d3.select("#tools-list")
-            .on("change", () => {
-                // Print the selected kit id
-                let selectedTool = d3.select("#tools-list").property("value");
-                setSelectedTool(selectedTool);
-            })
-            .selectAll("option")
-            .data(map.content, d => d.id);
-        options.enter()
-            .append("option")
-            .attr("value", (d) => { return d.id })
-            .text((d) => { return d.tool.title });
-        options.append("option")
-            .attr("value", (d) => { return d.id })
-            .text((d) => { return d.tool.title });
-        options.exit().remove();
-        let initialSelectedTool = map.content[0].id;
-        setSelectedTool(initialSelectedTool);
+            let initialSelectedDivPoint = map.content[0].id;
+            setSelectedDivPoint(initialSelectedDivPoint);
+
+        } else {
+            console.log("Não há pontos de divergência associados ao mapa selecionado");
+        }
     });
 }
 
-function setSelectedTool(toolId) {
-    localStorage.setItem("selectedTool", toolId);
-    const selectedProject = localStorage.getItem("selectedProject");
-    const selectedMap = localStorage.getItem("selectedMap");
-    const params = executeCalculations(selectedProject, '601accdc999f4a51b47056b1', toolId);
-    d3.select("#params").text(JSON.stringify(params, undefined, "\t"));
-    //buildDivergencePointStructure(localStorage.getItem("selectedTool"));
+async function setSelectedDivPoint(divPointId) {
+    localStorage.setItem("selectedDivPoint", divPointId);
+    const authorsScoresSorted = await executeCalculations(divPointId);
+    if (authorsScoresSorted.length > 0) {
+        let columns = Object.keys(authorsScoresSorted[0]);
+        columns.splice(columns.indexOf('id'), 1);
+        tabulate(authorsScoresSorted, columns);
+    } else {
+        let table = d3.select('#table-body');
+        let thead = table.select('thead')
+        let tbody = table.select('tbody');
+        tbody.selectAll('tr').remove();
+        thead.selectAll('th').remove();
+        thead.append('th').text('Ainda não há respostas para o kit selecionado');
+    }
 }
