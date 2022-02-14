@@ -18,13 +18,16 @@
     <a href="index.html">back</a>
     <br>
     lista de projetos
-    <button type="button" class="btn btn-primary btn-sm" onclick="download_table_as_csv('table-body')"
-      id="export-csv">Export to
-      CSV</button>
     <div class="d-flex flex-wrap" id="projects-container">
       projects: <select class="form-select" aria-label="Default select example" id="projects-list"></select>
       maps: <select class="form-select" aria-label="Default select example" id="maps-list"></select>
       kits: <select class="form-select" aria-label="Default select example" id="divpoints-list"></select>
+    </div>
+    <br>
+    <div class="d-flex flex-row-reverse">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="download_table_as_csv('table-body')"
+        id="export-csv">Export to
+        CSV</button>
     </div>
   </div>
   <div>
