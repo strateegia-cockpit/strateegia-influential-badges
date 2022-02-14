@@ -1,5 +1,6 @@
 console.log("rodando metrics...")
 
+import { tabulate } from './d3functions.js';
 import { getAllProjects, getCommentEngagementByContent, getCommentsGroupedByQuestionReport } from './strateegia-api.js';
 
 const users = JSON.parse(localStorage.getItem("users"));
@@ -39,35 +40,112 @@ async function testJsonPathWithStrateegiaAPI() {
 async function gatherData(projectId, userId, divergencePointId) {
   const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
   const commentEngagementByContent = await getCommentEngagementByContent(accessToken, projectId);
-  params.qtd_questoes_totais = divPointReport.length;
+  const statisticsForDivergentPoint = commentEngagementByContent.filter(divPoints => divPoints.id == divergencePointId)[0];
+  // =======================================
   params.qtd_questoes_respondidas = JSONPath.JSONPath({ path: `$..comments[?(@.author.id == '${userId}')]`, json: divPointReport }).length;
-  params.qtd_comentarios_totais = JSONPath.JSONPath({ path: `$..comments..reply_count`, json: divPointReport }).reduce((partialSum, a) => partialSum + a, 0);
+  params.qtd_questoes_totais = statisticsForDivergentPoint.question_count;
   params.qtd_comentarios_usuario = JSONPath.JSONPath({ path: `$..comments..replies[?(@.author.id == '${userId}')]`, json: divPointReport }).length;
-  params.qtd_participantes = users.length;
-  console.log(params);
+  params.qtd_comentarios_totais = statisticsForDivergentPoint.total_comments_count;
+  params.qtd_participantes = statisticsForDivergentPoint.people_active_count;
+  params.total_agreements_user = JSONPath.JSONPath({ path: `$..comments..agreements..[?(@.user_id == '${userId}')]`, json: divPointReport }).length;;
+  params.total_agreements = statisticsForDivergentPoint.agreements_comments_count;
+  params.bigger_amount_agreements_user = "COMPLETAR";
+  params.average_agreements_per_comment = "COMPLETAR";
+  params.total_inner_replies = "COMPLETAR";
+  params.total_replies = statisticsForDivergentPoint.reply_comments_count;
+  params.bigger_amount_inner_replies = "COMPLETAR";
+  params.average_inner_replies_per_comment = "COMPLETAR";
+
+
+}
+
+async function getDivPointReport(divergencePointId){
+  const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
+  return divPointReport;
+}
+
+async function getAuthorsData(divPointReport) {
+  let authorsData = [];
+  // const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
+  divPointReport.forEach(question => {
+    let authorsIdsAnsweredThisQuestion = [];
+    question.comments.forEach(comment => {
+      const authorId = comment.author.id;
+      if (authorsData.filter(author => author.id === authorId).length > 0) {
+        const authorIndex = authorsData.findIndex(author => author.id === authorId);
+        if (!authorsIdsAnsweredThisQuestion.includes(authorId)) {
+          authorsData[authorIndex].amount_ans_questions += 1;
+          authorsIdsAnsweredThisQuestion.push(authorId);
+        }
+        authorsData[authorIndex].amount_comments += 1;
+        authorsData[authorIndex].total_agreements += comment.agreements.length;
+        authorsData[authorIndex].bigger_amount_agreements = Math.max(comment.agreements.length, authorsData[authorIndex].bigger_amount_agreements);
+        authorsData[authorIndex].total_inner_replies += comment.reply_count;
+        authorsData[authorIndex].bigger_amount_inner_replies = Math.max(comment.reply_count, authorsData[authorIndex].bigger_amount_inner_replies);
+      } else {
+        authorsData.push({
+          id: authorId,
+          name: comment.author.name,
+          amount_comments: 1,
+          amount_ans_questions: 1,
+          total_agreements: comment.agreements.length,
+          bigger_amount_agreements: comment.agreements.length,
+          total_inner_replies: comment.reply_count,
+          bigger_amount_inner_replies: comment.reply_count,
+        });
+        authorsIdsAnsweredThisQuestion.push(authorId);
+      }
+    });
+  });
+  return authorsData;
+}
+
+async function getKitData(divPointReport, authorsData) {
+  // const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
+  let kitData = {};
+  kitData.amount_questions = divPointReport.length;
+  kitData.total_comments = 0;
+  kitData.total_agreements = 0;
+  kitData.total_replies = 0;
+  divPointReport.forEach(question => {
+    let commentList = question.comments;
+    kitData.total_comments += commentList.length;
+    commentList.forEach(comment => {
+      kitData.total_agreements += comment.agreements.length;
+      kitData.total_replies += comment.reply_count;
+    });
+  });
+  kitData.total_users = authorsData.length;
+  kitData.average_agreements_per_comment = kitData.total_agreements / kitData.total_comments;
+  let total_inner_replies_per_user = 0;
+  authorsData.forEach(author => {
+    total_inner_replies_per_user += author.total_inner_replies;
+  });
+  kitData.average_inner_replies_per_user = total_inner_replies_per_user / kitData.total_users;
+  return kitData;
 }
 
 // https://github.com/ricarthlima/ms-strateegia-user-analysis/blob/10f7d91a744748e8f078f14f4320767415e9cd7a/ms_influential_users_rails/app/controllers/influential_users_controller.rb#L7
-async function calculateMetrics() {
+function calculateAuthorScore(author, kitData) {
 
-  const qtd_questoes_respondidas = params.qtd_questoes_respondidas;
-  const qtd_questoes_totais = params.qtd_questoes_totais;
+  const qtd_questoes_respondidas = author.amount_ans_questions;
+  const qtd_questoes_totais = kitData.amount_questions;
 
-  const qtd_comentarios_usuario = params.qtd_comentarios_usuario;
-  const qtd_comentarios_totais = params.qtd_comentarios_totais;
-  const qtd_participantes = params.qtd_participantes;
+  const qtd_comentarios_usuario = author.amount_comments;
+  const qtd_comentarios_totais = kitData.total_comments;
+  const qtd_participantes = kitData.total_users;
 
-  const total_agreements_user = params.total_agreements_user;
-  const total_agreements = params.total_agreements;
+  const total_agreements_user = author.total_agreements;
+  const total_agreements = kitData.total_agreements;
 
-  const bigger_amount_agreements_user = params.bigger_amount_agreements_user;
-  const average_agreements_per_comment = params.average_agreements_per_comment;
+  const bigger_amount_agreements_user = author.bigger_amount_agreements;
+  const average_agreements_per_comment = kitData.average_agreements_per_comment;
 
-  const total_inner_replies = params.total_inner_replies;
-  const total_replies = params.total_replies;
+  const total_inner_replies = author.total_inner_replies;
+  const total_replies = kitData.total_replies;
 
-  const bigger_amount_inner_replies = params.bigger_amount_inner_replies;
-  const average_inner_replies_per_comment = params.average_inner_replies_per_comment;
+  const bigger_amount_inner_replies = author.bigger_amount_inner_replies;
+  const average_inner_replies_per_comment = kitData.average_inner_replies_per_user;
 
   /*
   O cálculo da métrica de influência é baseado no trabalho: 
@@ -154,7 +232,12 @@ async function calculateMetrics() {
   Valor esperado para usuário influente: Entre 0,1 e 0,5
   Observação: "total_inner_replies" é o somatório recursivo de todos os comentários gerados por aquela resposta.
   */
-  const f5 = total_inner_replies / total_replies;
+
+  let f5 = 0;
+
+  if(total_replies != 0){
+    f5 = total_inner_replies / total_replies;
+  }
 
   /*
   (f6) Replies Relativos
@@ -183,10 +266,20 @@ async function calculateMetrics() {
 }
 
 
-export function executeCalculations(projectId, userId, divergencePointId){
+export async function executeCalculations(projectId, userId, divergencePointId) {
   // Execute functions
   // testJsonPathWithStrateegiaAPI();
   gatherData(projectId, userId, divergencePointId);
-  calculateMetrics();
+  const divPointReport = await getDivPointReport(divergencePointId)
+  const authorsData = await getAuthorsData(divPointReport);
+  const kitData = await getKitData(divPointReport, authorsData);
+  authorsData.forEach(author => {
+    author.score = calculateAuthorScore(author, kitData).toFixed(2);
+  });
+  const authorsDataSorted = authorsData.sort((a, b) => b.score - a.score); 
+  console.log(authorsData);
+  let columns = ["name", "score"]//Object.keys(authorsData[0]);
+  tabulate(authorsData, columns);
+  console.log(kitData);
   return params;
 }
