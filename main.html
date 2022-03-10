@@ -15,26 +15,34 @@
 
 <body>
   <div class="container p-3">
-    <a href="index.html">back</a>
-    <br>
-    lista de projetos
-    <div class="d-flex flex-wrap" id="projects-container">
-      projects: <select class="form-select" aria-label="Default select example" id="projects-list"></select>
-      maps: <select class="form-select" aria-label="Default select example" id="maps-list"></select>
-      kits: <select class="form-select" aria-label="Default select example" id="divpoints-list"></select>
-    </div>
-    <br>
-    <div class="d-flex flex-row-reverse">
-      <button type="button" class="btn btn-secondary btn-sm" onclick="download_table_as_csv('table-body')"
-        id="export-csv">Export to
-        CSV</button>
-    </div>
+    <a href="index.html">logout</a>
   </div>
-  <div>
-    <table id="table-body">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+  <div class="container mt-2">
+    <div class="row input-group mb-2">
+      <span class="col-3 input-group-text">jornada</span>
+      <select class="col-10 form-select" aria-label="Default select example" id="projects-list"></select>
+    </div>
+    <div class="row input-group mb-2">
+      <span class="col-3 input-group-text">mapas</span>
+      <select class="col-10 form-select" aria-label="Default select example" id="maps-list"></select>
+    </div>
+    <div class="row input-group mb-2">
+      <span class="col-3 input-group-text">pontos de divergência</span>
+      <select class="col-10 form-select" aria-label="Default select example" id="divpoints-list"></select>
+    </div>
+    <div class="row input-group mb-2">
+      <div class="d-flex justify-content-between p-0">
+        <a href="https://docs.google.com/document/d/1AOaxrYJFdNVKrmocyh-vdoIDIFI91tU6ZrOTRZFBi-w/edit" target="_blank" class="btn btn-outline-primary btn-sm">mais informações sobre as métricas</a>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="download_table_as_csv('table-body')"
+          id="export-csv">exportar para csv</button>
+      </div>
+    </div>
+    <div class="row input-group mb-2">
+      <table id="table-body">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
