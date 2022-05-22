@@ -37,8 +37,12 @@
       <div class="d-flex justify-content-between p-0">
         <a href="https://docs.google.com/document/d/1AOaxrYJFdNVKrmocyh-vdoIDIFI91tU6ZrOTRZFBi-w/edit" target="_blank"
           class="btn btn-outline-primary btn-sm">mais informações sobre as métricas</a>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="download_table_as_csv('table-body')"
-          id="export-csv">exportar para csv</button>
+        <div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="exportTableAsCsv('id-da-tabela', ',')"
+            id="export-csv">csv</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="exportJson('referência-do-elemento')"
+            id="export-csv">json</button>
+        </div>
       </div>
     </div>
     <div class="row input-group mb-2">
