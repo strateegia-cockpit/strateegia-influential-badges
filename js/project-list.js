@@ -56,10 +56,13 @@ export async function initializeProjectList() {
         localStorage.setItem("selectedProject", selectedProject);
         console.log(selectedProject);
         updateMapList(selectedProject);
+        d3.select("#project-link").attr("href", `https://app.strateegia.digital/journey/${selectedProject}`);
     });
 
-    localStorage.setItem("selectedProject", listProjects[0].id);
-    updateMapList(listProjects[0].id);
+    const defaultProject = listProjects[0].id;
+    localStorage.setItem("selectedProject", defaultProject);
+    d3.select("#project-link").attr("href", `https://app.strateegia.digital/journey/${defaultProject}`);
+    updateMapList(defaultProject);
 }
 
 async function updateMapList(selectedProject) {
