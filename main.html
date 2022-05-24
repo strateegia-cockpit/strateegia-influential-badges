@@ -35,11 +35,14 @@
       <select class="col-10 form-select" aria-label="Default select example" id="divpoints-list"></select>
     </div>
     <div class="row input-group mb-2">
-      <div class="d-flex justify-content-between p-0">
-        <a href="https://docs.google.com/document/d/1AOaxrYJFdNVKrmocyh-vdoIDIFI91tU6ZrOTRZFBi-w/edit" target="_blank"
-          class="btn btn-outline-primary btn-sm">mais informações sobre as métricas</a>
+      <div class="d-flex justify-content-between" style="border-style: dotted;">
         <div>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="exportTableAsCsv('id-da-tabela', ',')"
+          <button type="button" class="btn btn-outline-primary btn-sm"
+            onclick="window.open('https://docs.google.com/document/d/1AOaxrYJFdNVKrmocyh-vdoIDIFI91tU6ZrOTRZFBi-w/edit','_blank')">mais
+            informações sobre as métricas</button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="exportTableAsCsv('table-body', ',')"
             id="export-csv">csv</button>
           <button type="button" class="btn btn-secondary btn-sm" onclick="exportJson('referência-do-elemento')"
             id="export-csv">json</button>
