@@ -10,13 +10,25 @@ export default function DivPointList({ mapId, handleSelectChange }) {
     async function fetchMapList() {
       try {
         const accessToken = localStorage.getItem("accessToken");
+        // let map = [];
+        // if (typeof mapId === 'object') {
+        //   Promise.all(
+        //     mapId.map(async (id) => {
+        //       const maps = await api.getMapById(accessToken, id)
+        //       return maps;
+        //     })
+        //     .then(data => map.push(data))
+        //   )
+        // }
         const map = await api.getMapById(accessToken, mapId);
-        console.log("map: %o", map);
-        // console.log('projectList: %o', projectList);
+        console.log('maps', map);
+        const divPoints = map.points.filter((point) => point.point_type === "DIVERGENCE");
+        const allIds = divPoints.map(({id}) => id);
+        const allOption = {id: allIds, title: i18n.t('selector.list')};
 
-        setDivPointList(
-          map.points.filter((point) => point.point_type === "DIVERGENCE")
-        );
+        divPoints.unshift(allOption);
+        console.log(divPoints)
+        setDivPointList(divPoints);
       } catch (error) {
         console.log(error);
       }

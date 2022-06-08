@@ -13,7 +13,7 @@ import MapList from "../components/MapList";
 import ProjectList from "../components/ProjectList";
 import DivPointList from "../components/DivPointList";
 import { i18n } from "../translate/i18n";
-import { executeCalculations } from "../components/metrics";
+import { executeCalculations, getMeanForAllDivPoints } from "../components/metrics";
 import UserTable from "../components/UserTable";
 
 export default function Main() {
@@ -41,13 +41,30 @@ export default function Main() {
   };
 
   const handleMapSelectChange = (e) => {
-    setSelectedMap(e.target.value);
+    const mapId = e.target.value;
+    
+    if (mapId === 24) {
+      setSelectedMap(mapId);
+    } else {
+      const mapsIdArr = mapId.split(',');
+      setSelectedMap(mapsIdArr)
+    }
   };
 
   const handleDivPointSelectChange = async (e) => {
-    setSelectedDivPoint(e.target.value);
-    const usersScore = await executeCalculations(e.target.value);
-    setUsersScore(usersScore)
+    const divId = e.target.value;
+    setSelectedDivPoint(divId);
+
+    if (divId.length === 24) {
+      const usersScore = await executeCalculations(divId);
+      setUsersScore(usersScore)
+    } else {
+      const usersScores = await getMeanForAllDivPoints(divId);
+      console.log(1, usersScores)
+      setUsersScore(usersScores)
+    }
+
+    // const usersScore = await executeCalculations(e.target.value);
   };
 
   useEffect(() => {
@@ -78,7 +95,7 @@ export default function Main() {
   }, []);
 
   useEffect(() => {
-    console.log(usersScore)
+    // console.log('sasA', usersScore)
   }, [usersScore]);
 
   // console.log(selectedProject + " , " + firstMap);

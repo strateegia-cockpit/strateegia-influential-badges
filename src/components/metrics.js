@@ -297,11 +297,11 @@ export async function gatherData(projectId, userId, divergencePointId) {
    async function executeCalculations(divergencePointId) {
 
     const divPointReport = await getDivPointReport(divergencePointId);
-    console.log('divPointReport', divPointReport)
+    // console.log('divPointReport', divPointReport)
     const authorsData = await getAuthorsData(divPointReport);
-    console.log('authorsData', authorsData)
+    // console.log('authorsData', authorsData)
     const kitData = await getKitData(divPointReport, authorsData);
-    console.log('kitData', kitData)
+    // console.log('kitData', kitData)
     
     const authorsScores = [];
     authorsData.forEach(author => {
@@ -310,7 +310,145 @@ export async function gatherData(projectId, userId, divergencePointId) {
     const authorsScoresSorted = authorsScores.sort((a, b) => b.score - a.score);
     return authorsScoresSorted;
   }
+
+  async function getMeanForAllDivPoints(divId) {
+
+    const idsArray = divId.split(',');
+    const scoresArray = [];
+    console.log(idsArray);
+
+
+    return Promise.all(
+      idsArray.map((id) => {
+        return executeCalculations(id)
+        .then(usersCalc => {
+          usersCalc.length > 0 && usersCalc.map(users => scoresArray.push(users))
+          return scoresArray
+        });
+      })
+    )
+    .then(data => {
+      const allScores = data[0];
+      allScores.sort((a, b) => a.name.localeCompare(b.name));
+
+      const occurrences = allScores.reduce((acc, {name}) => {
+        return {...acc, [name]: (acc[name] || 0) + 1 }
+      }, []);
+
+      const result = []
+      for (const key in occurrences) {
+        const singleUser = allScores.filter(({name}) => name === key)
+        .reduce((acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, metrica2, score}) => {
+          const calculate = (value, key) => {
+            return (typeof value === 'number' ? value : Number(value)) + (acc[0]?.[key] || 0)
+          }
+
+          return [{
+            'name': name, 
+            'id': id,
+            'f1': calculate(f1, 'f1'), 
+            'f2': calculate(f2, 'f2'), 
+            'f3': calculate(f3, 'f3'), 
+            'f4': calculate(f4, 'f4'), 
+            'f5': calculate(f5, 'f5'), 
+            'f6': calculate(f6, 'f6'), 
+            'metrica1': calculate(metrica1, 'metrica1'), 
+            'metrica2': calculate(metrica2, 'metrica2'), 
+            'score': calculate(score, 'score')
+          }]
+        }, [])
+        .map(user => {
+          const occur = occurrences[user.name];
+          const getMean = (key) => (user[key] / occur).toFixed(2)
+          const meanUser = {
+            'name': user.name, 
+            'f1': getMean('f1'), 
+            'f2': getMean('f2'), 
+            'f3': getMean('f3'), 
+            'f4': getMean('f4'), 
+            'f5': getMean('f5'), 
+            'f6': getMean('f6'), 
+            'metrica1': getMean('metrica1'), 
+            'metrica2': getMean('metrica2'), 
+            'score': getMean('score')
+          }
+          return meanUser
+        })
+        result.push(singleUser)
+      }
+      return Promise.all(
+        result.map(userArr => userArr[0])
+      )
+    });
+    
+
+  }
   
 
 
-export {executeCalculations}
+export {executeCalculations, getMeanForAllDivPoints}
+
+// Promise.all(
+//   idsArray.map((id) => {
+//     return executeCalculations(id)
+//     .then(usersCalc => {
+//       usersCalc.length > 0 && usersCalc.map(users => scoresArray.push(users))
+//       return scoresArray
+//     });
+//   })
+// )
+// .then(data => {
+//   const allScores = data[0];
+//   allScores.sort((a, b) => a.name.localeCompare(b.name));
+
+//   const occurrences = allScores.reduce((acc, {name}) => {
+//     return {...acc, [name]: (acc[name] || 0) + 1 }
+//   }, []);
+
+//   const result = []
+//   for (const key in occurrences) {
+//     const singleUser = allScores.filter(({name}) => name === key)
+//     .reduce((acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, metrica2, score}) => {
+//       const calculate = (value, key) => {
+//         console.log(key, typeof value)
+//         return (typeof value === 'number' ? value : Number(value)) + (acc[0]?.[key] || 0)
+//       }
+
+//       return [{
+//         'name': name, 
+//         'id': id,
+//         'f1': calculate(f1, 'f1'), 
+//         'f2': calculate(f2, 'f2'), 
+//         'f3': calculate(f3, 'f3'), 
+//         'f4': calculate(f4, 'f4'), 
+//         'f5': calculate(f5, 'f5'), 
+//         'f6': calculate(f6, 'f6'), 
+//         'metrica1': calculate(metrica1, 'metrica1'), 
+//         'metrica2': calculate(metrica2, 'metrica2'), 
+//         'score': calculate(score, 'score')
+//       }]
+//     }, [])
+//     .map(user => {
+//       const occur = occurrences[user.name];
+//       const getMean = (key) => (user[key] / occur).toFixed(2)
+//       const meanUser = {
+//         'name': user.name, 
+//         'f1': getMean('f1'), 
+//         'f2': getMean('f2'), 
+//         'f3': getMean('f3'), 
+//         'f4': getMean('f4'), 
+//         'f5': getMean('f5'), 
+//         'f6': getMean('f6'), 
+//         'metrica1': getMean('metrica1'), 
+//         'metrica2': getMean('metrica2'), 
+//         'score': getMean('score')
+//       }
+//       return meanUser
+//     })
+//     result.push(singleUser)
+//   }
+//   Promise.all(
+//     result.map(userArr => userArr[0])
+//   )
+//   .then(data => setter(data))
+// });

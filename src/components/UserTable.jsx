@@ -9,10 +9,11 @@ import {
 } from '@chakra-ui/react';
 import { i18n } from "../translate/i18n";
 
-export const THeader = ({text, weight}) => {
+export const THeader = ({text, weight, alignment}) => {
     return (
         <Th 
             textTransform='lowercase'
+            textAlign={alignment || 'center'}
             fontWeight={weight || 500}
             className='biggerTh'
             fontFamily='Montserrat, sans-serif'
@@ -31,7 +32,7 @@ const UserTable = ({usersScore}) => {
             <Table variant='striped' w='50vw'>
                 <Thead>
                 <Tr textTransform='lowercase' >
-                    <THeader text={i18n.t('userTable.th1')}/>
+                    <THeader alignment='left' text={i18n.t('userTable.th1')}/>
                     <THeader text={i18n.t('userTable.th2')}/>
                     <THeader text={i18n.t('userTable.th3')}/>
                     <THeader text={i18n.t('userTable.th4')} weight={800}/>
@@ -41,13 +42,13 @@ const UserTable = ({usersScore}) => {
                 <Tbody>
                 {usersScore
                     ?.map((user, index) => (
-                        <Tr className={index % 2 === 0 ? 'strip' : ''}>
-                            <Td className="user_name" textTransform='lowercase'> 
+                        <Tr key={index}>
+                            <Td key={user.name} textTransform='lowercase'> 
                                 {user.name}
                             </Td>
-                            <Td>{user.metrica1} %</Td>
-                            <Td>{user.metrica2} %</Td>
-                            <Td>{user.score} %</Td>
+                            <Td key={user.metrica1} textAlign='center'>{user.metrica1} %</Td>
+                            <Td key={user.metrica2} textAlign='center'>{user.metrica2} %</Td>
+                            <Td key={user.score} textAlign='center'>{user.score} %</Td>
                         </Tr>
                     )
                 )}

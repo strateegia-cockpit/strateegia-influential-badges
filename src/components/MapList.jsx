@@ -11,9 +11,14 @@ export default function MapList({ projectId, handleSelectChange }) {
       try {
         const accessToken = localStorage.getItem('accessToken');
         const project = await api.getProjectById(accessToken, projectId);
-        console.log('project: %o', project);
-        // console.log('projectList: %o', projectList);
-        setMapList(project.maps);
+
+        const maps = project.maps;
+        // const allIds = maps.map(({id}) => id);
+        // const allOption = {id: allIds, title: i18n.t('selector.list')};
+
+        // maps.unshift(allOption);
+        // console.log(maps);
+        setMapList(maps);
       } catch (error) {
         console.log(error);
       }
