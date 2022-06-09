@@ -39,6 +39,7 @@ export default function Main() {
       }
     }
     fetchMapList();
+    setSelectedMap('');
   };
 
   const handleMapSelectChange = (e) => {
@@ -59,7 +60,8 @@ export default function Main() {
   }, [selectedMap])
 
   const handleDivPointSelectChange = async (e) => {
-    setSelectedDivPoint(e.target.value);
+    
+    setSelectedDivPoint(e.target.value)
     console.log("🚀 ~ file: Main.jsx ~ line 60 ~ handleDivPointSelectChange ~ e.target.value", e.target.value)
   };
 
@@ -67,10 +69,15 @@ export default function Main() {
     async function getAndSetUsersScore(selectedDivPoint) {
       if (selectedDivPoint.length === 24) {
         const usersScore = await executeCalculations(selectedDivPoint);
-        setUsersScore(usersScore)
+        const sortedUsersScore = usersScore.sort((a, b) => b.score - a.score);
+        setUsersScore(sortedUsersScore)
       } else {
         const usersScores = await getMeanForAllDivPoints(selectedDivPoint);
-        setUsersScore(usersScores)
+        console.log("🚀 ~ file: Main.jsx ~ line 74 ~ getAndSetUsersScore ~ usersScores", usersScores)
+        
+        const sortedUsersScore = usersScores.sort((a, b) => b.score - a.score);
+        console.log("🚀 ~ file: Main.jsx ~ line 77 ~ getAndSetUsersScore ~ sortedUsersScore", sortedUsersScore)
+        setUsersScore(sortedUsersScore)
       }
     }
 
@@ -78,7 +85,7 @@ export default function Main() {
   }, [selectedDivPoint]);
 
   useEffect(() => {
-    setSelectedMap("");
+    
   }, [selectedProject])
 
   useEffect(() => {

@@ -41,14 +41,14 @@ const UserTable = ({usersScore}) => {
                 </Thead>
                 <Tbody>
                 {usersScore
-                    ?.map((user, index) => (
-                        <Tr key={index}>
+                    ?.map((user) => (
+                        <Tr key={user.id}>
                             <Td key={user.name} textTransform='lowercase'> 
                                 {user.name}
                             </Td>
-                            <Td key={user.metrica1+index} textAlign='center'>{user.metrica1} %</Td>
-                            <Td key={user.metrica2} textAlign='center'>{user.metrica2} %</Td>
-                            <Td key={index + user.score} textAlign='center'>{user.score} %</Td>
+                            <Td key={user.metrica1 + '' + user.id} textAlign='center'>{user.metrica1} %</Td>
+                            <Td key={user.id + user.metrica2 + user.id} textAlign='center'>{user.metrica2} %</Td>
+                            <Td key={user.id + user.score} textAlign='center'>{user.score} %</Td>
                         </Tr>
                     )
                 )}

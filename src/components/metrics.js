@@ -311,6 +311,8 @@ async function executeCalculations(divergencePointId) {
 async function getMeanForAllDivPoints(divId) {
 
   const idsArray = divId.split(',');
+  console.log("🚀 ~ file: metrics.js ~ line 314 ~ getMeanForAllDivPoints ~ idsArray", idsArray)
+  
   const allScores = await Promise.all(
     idsArray.map((id) => {
       return executeCalculations(id);
@@ -321,20 +323,20 @@ async function getMeanForAllDivPoints(divId) {
     return { ...acc, [name]: (acc[name] || 0) + 1 }
   }, []);
 
-  const result = getResult(allScores, occurrences);
+  const result = getResult(allScores, occurrences, divId);
 
   return result;
 }
 
-function getResult(allScores, occurrences) {
+function getResult(allScores, occurrences, divId) {
 
   const result = Object.keys(occurrences).map(occurrence => {
     const singleUser = allScores.filter(({ name }) => name === occurrence)
       .reduce(calculateUserScore, [])
-      .map(user => calculateUserScoreMean(user, occurrences));
+      .map(user => calculateUserScoreMean(user, divId));
     return singleUser
   })
-
+  console.log("🚀 ~ file: metrics.js ~ line 341 ~ getResult ~ result.flat()", result.flat())
   return result.flat();
 }
 
@@ -359,10 +361,10 @@ function calculateUserScore(acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, m
   }]
 }
 
-function calculateUserScoreMean(user, occurrences) {
+function calculateUserScoreMean(user, divId) {
 
-  const occur = occurrences[user.name];
-  const getMean = (key) => (user[key] / occur).toFixed(2)
+  const allDivPoints = divId.length;
+  const getMean = (key) => (user[key] / allDivPoints).toFixed(2)
   const meanUser = {
     'name': user.name,
     'f1': getMean('f1'),

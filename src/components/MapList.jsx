@@ -7,6 +7,7 @@ export default function MapList({ projectId, handleSelectChange }) {
   const [mapList, setMapList] = useState(null);
 
   useEffect(() => {
+    setMapList(null)
     async function fetchMapList() {
       try {
         const accessToken = localStorage.getItem('accessToken');
@@ -23,7 +24,11 @@ export default function MapList({ projectId, handleSelectChange }) {
       }
     }
     fetchMapList();
+
+
   }, [projectId]);
+
+
 
   return projectId ? (
     <Select placeholder={i18n.t('main.placeholderMap')}  onChange={handleSelectChange}>
