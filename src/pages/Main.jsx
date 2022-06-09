@@ -15,6 +15,7 @@ import DivPointList from "../components/DivPointList";
 import { i18n } from "../translate/i18n";
 import { executeCalculations, getMeanForAllDivPoints } from "../components/metrics";
 import UserTable from "../components/UserTable";
+import { ExportsButtons } from "../components/ExportsButtons";
 
 export default function Main() {
   const divSelector = useRef();
@@ -141,6 +142,7 @@ export default function Main() {
         mapId={selectedMap}
         handleSelectChange={handleDivPointSelectChange}
       />
+      <ExportsButtons data={usersScore || ''} saveFile={() => console.log('salvando docx q n existe')} project={usersScore}/>
       <Loading active={isLoading} />
       <Heading as="h3" size="md" mb={3} mt={3}>
         {i18n.t('main.heading')}

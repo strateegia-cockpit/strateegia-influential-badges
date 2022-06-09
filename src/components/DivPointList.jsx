@@ -52,12 +52,12 @@ export default function DivPointList({ mapId, handleSelectChange, innerRef }) {
   }
 
 
-  return (
+  return mapId && (
     <Select
       placeholder={i18n.t('main.placeholderDiv')}
       onChange={handleSelectChange}
-      visibility={mapId && mapId.length === 24 ? 'visible' : 'hidden'}
-      // value={mapId.length > 1 ? divPointList?.[0].id : undefined}
+      isDisabled={mapId.length === 24 ? false : true}
+      value={mapId.length !== 24 ? divPointList?.[0].id : undefined}
       ref={innerRef}
     >
       {divPointList
