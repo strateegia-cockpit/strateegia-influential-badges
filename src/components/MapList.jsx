@@ -13,11 +13,10 @@ export default function MapList({ projectId, handleSelectChange }) {
         const project = await api.getProjectById(accessToken, projectId);
 
         const maps = project.maps;
-        // const allIds = maps.map(({id}) => id);
-        // const allOption = {id: allIds, title: i18n.t('selector.list')};
-
-        // maps.unshift(allOption);
-        // console.log(maps);
+        const allIds = maps.map(({id}) => id);
+        const allOption = {id: allIds, title: i18n.t('selector.list')};
+        
+        maps.length > 1 && maps.unshift(allOption);
         setMapList(maps);
       } catch (error) {
         console.log(error);
@@ -29,9 +28,9 @@ export default function MapList({ projectId, handleSelectChange }) {
   return projectId ? (
     <Select placeholder={i18n.t('main.placeholderMap')}  onChange={handleSelectChange}>
       {mapList
-        ? mapList.map(mapItem => {
+        ? mapList.map((mapItem, index) => {
             return (
-              <option key={mapItem.id} value={mapItem.id}>
+              <option key={index} value={mapItem.id}>
                 {mapItem.title}
               </option>
             );

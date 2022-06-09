@@ -6,7 +6,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as api from "strateegia-api";
 import Loading from "../components/Loading";
 import MapList from "../components/MapList";
@@ -17,6 +17,7 @@ import { executeCalculations, getMeanForAllDivPoints } from "../components/metri
 import UserTable from "../components/UserTable";
 
 export default function Main() {
+  const divSelector = useRef();
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedMap, setSelectedMap] = useState("");
   const [selectedDivPoint, setSelectedDivPoint] = useState("");
@@ -43,35 +44,46 @@ export default function Main() {
   const handleMapSelectChange = (e) => {
     const mapId = e.target.value;
     
-    if (mapId === 24) {
+    if (mapId.length === 24) {
       setSelectedMap(mapId);
     } else {
       const mapsIdArr = mapId.split(',');
-      setSelectedMap(mapsIdArr)
+      setSelectedMap(mapsIdArr); 
     }
-  };
-
-  const handleDivPointSelectChange = async (e) => {
-    const divId = e.target.value;
-    setSelectedDivPoint(divId);
-
-    if (divId.length === 24) {
-      const usersScore = await executeCalculations(divId);
-      setUsersScore(usersScore)
-    } else {
-      const usersScores = await getMeanForAllDivPoints(divId);
-      console.log(1, usersScores)
-      setUsersScore(usersScores)
-    }
-
-    // const usersScore = await executeCalculations(e.target.value);
   };
 
   useEffect(() => {
-    setMapDetails(null);
+    setTimeout(() => {
+      typeof selectedMap === 'object' && setSelectedDivPoint(divSelector.current[1].value)
+    }, 1000);
+  }, [selectedMap])
+
+  const handleDivPointSelectChange = async (e) => {
+    setSelectedDivPoint(e.target.value);
+    console.log("🚀 ~ file: Main.jsx ~ line 60 ~ handleDivPointSelectChange ~ e.target.value", e.target.value)
+  };
+
+  useEffect(() => {
+    async function getAndSetUsersScore(selectedDivPoint) {
+      if (selectedDivPoint.length === 24) {
+        const usersScore = await executeCalculations(selectedDivPoint);
+        setUsersScore(usersScore)
+      } else {
+        const usersScores = await getMeanForAllDivPoints(selectedDivPoint);
+        setUsersScore(usersScores)
+      }
+    }
+
+    selectedDivPoint !== '' && getAndSetUsersScore(selectedDivPoint);
+  }, [selectedDivPoint]);
+
+  useEffect(() => {
     setSelectedMap("");
-    setSelectedDivPoint("");
-  }, [selectedProject]);
+  }, [selectedProject])
+
+  useEffect(() => {
+    console.log(usersScore)
+  }, [usersScore])
 
   useEffect(() => {
     setSelectedDivPoint("");
@@ -93,12 +105,6 @@ export default function Main() {
   useEffect(() => {
     setAccessToken(localStorage.getItem("accessToken"));
   }, []);
-
-  useEffect(() => {
-    // console.log('sasA', usersScore)
-  }, [usersScore]);
-
-  // console.log(selectedProject + " , " + firstMap);
 
   return (
     <Box padding={10}>
@@ -124,6 +130,7 @@ export default function Main() {
         handleSelectChange={handleMapSelectChange}
       />
       <DivPointList
+        innerRef={divSelector}
         mapId={selectedMap}
         handleSelectChange={handleDivPointSelectChange}
       />

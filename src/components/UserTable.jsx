@@ -46,9 +46,9 @@ const UserTable = ({usersScore}) => {
                             <Td key={user.name} textTransform='lowercase'> 
                                 {user.name}
                             </Td>
-                            <Td key={user.metrica1} textAlign='center'>{user.metrica1} %</Td>
+                            <Td key={user.metrica1+index} textAlign='center'>{user.metrica1} %</Td>
                             <Td key={user.metrica2} textAlign='center'>{user.metrica2} %</Td>
-                            <Td key={user.score} textAlign='center'>{user.score} %</Td>
+                            <Td key={index + user.score} textAlign='center'>{user.score} %</Td>
                         </Tr>
                     )
                 )}

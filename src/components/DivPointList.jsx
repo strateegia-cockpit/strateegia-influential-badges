@@ -3,32 +3,35 @@ import { Select } from "@chakra-ui/react";
 import * as api from "strateegia-api";
 import { i18n } from "../translate/i18n";
 
-export default function DivPointList({ mapId, handleSelectChange }) {
-  const [DivPointList, setDivPointList] = useState(null);
+export default function DivPointList({ mapId, handleSelectChange, innerRef }) {
+  const [divPointList, setDivPointList] = useState(null);
 
   useEffect(() => {
     async function fetchMapList() {
       try {
         const accessToken = localStorage.getItem("accessToken");
-        // let map = [];
-        // if (typeof mapId === 'object') {
-        //   Promise.all(
-        //     mapId.map(async (id) => {
-        //       const maps = await api.getMapById(accessToken, id)
-        //       return maps;
-        //     })
-        //     .then(data => map.push(data))
-        //   )
-        // }
-        const map = await api.getMapById(accessToken, mapId);
-        console.log('maps', map);
-        const divPoints = map.points.filter((point) => point.point_type === "DIVERGENCE");
-        const allIds = divPoints.map(({id}) => id);
-        const allOption = {id: allIds, title: i18n.t('selector.list')};
+        
+        if (mapId.length !== 24) {
 
-        divPoints.unshift(allOption);
-        console.log(divPoints)
-        setDivPointList(divPoints);
+          const allProjectMaps = await Promise.all(
+            mapId.map(async (id) => {
+              const allMapsInfo = await api.getMapById(accessToken, id)
+              return allMapsInfo;
+            })
+          ).then(data => data.flat());  
+
+          const divPoints = allProjectMaps.map(singleMap => getOnlyDivPoints(singleMap));
+        
+          const allDivPoints = setAllDivPointsOption(divPoints.flat())
+          setDivPointList(allDivPoints);
+
+        } else {
+          const map = await api.getMapById(accessToken, mapId);
+          const divPoints = getOnlyDivPoints(map);
+          const allDivPoints = setAllDivPointsOption(divPoints)
+          setDivPointList(allDivPoints);
+        }
+
       } catch (error) {
         console.log(error);
       }
@@ -36,13 +39,29 @@ export default function DivPointList({ mapId, handleSelectChange }) {
     fetchMapList();
   }, [mapId]);
 
-  return mapId ? (
+  function getOnlyDivPoints(map) {
+    const divPoints = map.points.filter((point) => point.point_type === "DIVERGENCE");
+    return divPoints;
+  }
+
+  function setAllDivPointsOption(divPoints) {
+    const allIds = divPoints.map(({id}) => id);
+    const allOption = {id: allIds, title: i18n.t('selector.list')};
+    divPoints.length > 1 && divPoints.unshift(allOption);
+    return divPoints;
+  }
+
+
+  return (
     <Select
       placeholder={i18n.t('main.placeholderDiv')}
       onChange={handleSelectChange}
+      visibility={mapId && mapId.length === 24 ? 'visible' : 'hidden'}
+      // value={mapId.length > 1 ? divPointList?.[0].id : undefined}
+      ref={innerRef}
     >
-      {DivPointList
-        ? DivPointList.map((divPoint) => {
+      {divPointList
+        ? divPointList.map((divPoint) => {
             return (
               <option key={divPoint.id} value={divPoint.id}>
                 {divPoint.title}
@@ -51,7 +70,5 @@ export default function DivPointList({ mapId, handleSelectChange }) {
           })
         : null}
     </Select>
-  ) : (
-    ""
   );
 }
