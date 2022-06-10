@@ -137,7 +137,7 @@ export default function Main() {
         </Box>
       ) : null}
       {selectedDivPoint !== "" ? (
-        <Box mt={3} display='flex' justifyContent='center'>
+        <Box mt={10} display='flex' justifyContent='left'>
           <UserTable usersScore={usersScore}/>
         </Box>
       ) : null}
