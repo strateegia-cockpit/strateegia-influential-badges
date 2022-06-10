@@ -323,7 +323,7 @@ async function getMeanForAllDivPoints(divId) {
     return { ...acc, [name]: (acc[name] || 0) + 1 }
   }, []);
 
-  const result = getResult(allScores, occurrences, divId);
+  const result = getResult(allScores, occurrences, idsArray);
 
   return result;
 }
@@ -361,7 +361,6 @@ function calculateUserScore(acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, m
 }
 
 function calculateUserScoreMean(user, divId) {
-
   const allDivPoints = divId.length;
   const getMean = (key) => (user[key] / allDivPoints).toFixed(2)
   const meanUser = {
