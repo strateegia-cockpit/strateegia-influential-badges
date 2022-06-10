@@ -16,7 +16,7 @@ const messages = {
             userTable: {
                 th1: 'nome',
                 th2: 'ação',
-                th3: 'reação',
+                th3: 'impacto',
                 th4: 'colaboração',
             },
             selector: {
