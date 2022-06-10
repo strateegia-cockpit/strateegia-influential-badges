@@ -29,7 +29,7 @@ const UserTable = ({usersScore}) => {
 
     return (
         // <TableContainer>
-            <Table variant='striped' w='50vw'>
+            <Table variant='striped' w='60vw'>
                 <Thead>
                 <Tr textTransform='lowercase' >
                     <THeader alignment='left' text={i18n.t('userTable.th1')}/>
