@@ -37,6 +37,7 @@ export async function testJsonPathWithStrateegiaAPI() {
 }
 
 export async function gatherData(projectId, userId, divergencePointId) {
+  const accessToken = localStorage.getItem("accessToken");
   const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
   const commentEngagementByContent = await getCommentEngagementByContent(accessToken, projectId);
   const statisticsForDivergentPoint = commentEngagementByContent.filter(divPoints => divPoints.id == divergencePointId)[0];
@@ -58,6 +59,7 @@ export async function gatherData(projectId, userId, divergencePointId) {
 }
 
 async function getDivPointReport(divergencePointId) {
+  const accessToken = localStorage.getItem("accessToken");
   const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
   return divPointReport;
 }
