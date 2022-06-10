@@ -38,7 +38,6 @@ export async function testJsonPathWithStrateegiaAPI() {
 
 export async function gatherData(projectId, userId, divergencePointId) {
   const divPointReport = await getCommentsGroupedByQuestionReport(accessToken, divergencePointId);
-  console.log(divPointReport)
   const commentEngagementByContent = await getCommentEngagementByContent(accessToken, projectId);
   const statisticsForDivergentPoint = commentEngagementByContent.filter(divPoints => divPoints.id == divergencePointId)[0];
   // =======================================
@@ -311,7 +310,6 @@ async function executeCalculations(divergencePointId) {
 async function getMeanForAllDivPoints(divId) {
 
   const idsArray = divId.split(',');
-  console.log("🚀 ~ file: metrics.js ~ line 314 ~ getMeanForAllDivPoints ~ idsArray", idsArray)
   
   const allScores = await Promise.all(
     idsArray.map((id) => {
@@ -336,7 +334,6 @@ function getResult(allScores, occurrences, divId) {
       .map(user => calculateUserScoreMean(user, divId));
     return singleUser
   })
-  console.log("🚀 ~ file: metrics.js ~ line 341 ~ getResult ~ result.flat()", result.flat())
   return result.flat();
 }
 
