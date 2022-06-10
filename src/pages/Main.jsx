@@ -61,9 +61,7 @@ export default function Main() {
   }, [selectedMap])
 
   const handleDivPointSelectChange = async (e) => {
-    
     setSelectedDivPoint(e.target.value)
-    console.log("🚀 ~ file: Main.jsx ~ line 60 ~ handleDivPointSelectChange ~ e.target.value", e.target.value)
   };
 
   useEffect(() => {
@@ -73,11 +71,8 @@ export default function Main() {
         const sortedUsersScore = usersScore.sort((a, b) => b.score - a.score);
         setUsersScore(sortedUsersScore)
       } else {
-        const usersScores = await getMeanForAllDivPoints(selectedDivPoint);
-        console.log("🚀 ~ file: Main.jsx ~ line 74 ~ getAndSetUsersScore ~ usersScores", usersScores)
-        
-        const sortedUsersScore = usersScores.sort((a, b) => b.score - a.score);
-        console.log("🚀 ~ file: Main.jsx ~ line 77 ~ getAndSetUsersScore ~ sortedUsersScore", sortedUsersScore)
+        const usersScore = await getMeanForAllDivPoints(selectedDivPoint);
+        const sortedUsersScore = usersScore.sort((a, b) => b.score - a.score);
         setUsersScore(sortedUsersScore)
       }
     }
@@ -86,22 +81,12 @@ export default function Main() {
   }, [selectedDivPoint]);
 
   useEffect(() => {
-    
-  }, [selectedProject])
-
-  useEffect(() => {
-    console.log(usersScore)
-  }, [usersScore])
-
-  useEffect(() => {
     setSelectedDivPoint("");
     async function fetchData() {
       setIsLoading(true);
       try {
         const response = await api.getMapById(accessToken, selectedMap);
         setMapDetails({ ...response });
-        // [TODO] - use the access token to fetch the data
-        // [TODO] - add the fetch data function here
       } catch (error) {
         console.log(error);
       }

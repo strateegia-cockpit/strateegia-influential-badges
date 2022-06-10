@@ -9,6 +9,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import { auth } from "strateegia-api";
 import { ColorModeSwitcher } from "../ColorModeSwitcher";
@@ -21,6 +22,7 @@ export default function Signin() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const toast = useToast();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,6 +37,11 @@ export default function Signin() {
       }
     } catch (error) {
       console.error(error);
+      toast({
+        title: 'email ou senha inválidos',
+        status: 'error',
+        isClosable: true
+      })
     }
   };
 
