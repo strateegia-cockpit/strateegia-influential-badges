@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { i18n } from "../translate/i18n";
 
-export const THeader = ({text, weight, alignment}) => {
+export const THeader = ({text, weight, alignment, width}) => {
     return (
         <Th 
             textTransform='lowercase'
@@ -18,6 +18,7 @@ export const THeader = ({text, weight, alignment}) => {
             className='biggerTh'
             fontFamily='Montserrat, sans-serif'
             fontSize={16}
+            minW={width || 'auto' }
         >
             {text}
         </Th>
@@ -33,7 +34,7 @@ const UserTable = ({usersScore}) => {
                 <Thead>
                 <Tr textTransform='lowercase' >
                     <THeader alignment='left' text={i18n.t('userTable.th1')}/>
-                    <THeader text={i18n.t('userTable.th2')}/>
+                    <THeader width={'120px'} text={i18n.t('userTable.th2')}/>
                     <THeader text={i18n.t('userTable.th3')}/>
                     <THeader text={i18n.t('userTable.th4')} weight={800}/>
                    
