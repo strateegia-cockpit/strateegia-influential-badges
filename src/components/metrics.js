@@ -310,8 +310,10 @@ async function executeCalculations(divergencePointId) {
 }
 
 async function getMeanForAllDivPoints(divId) {
+console.log("🚀 ~ file: metrics.js ~ line 313 ~ getMeanForAllDivPoints ~ divId", divId)
 
-  const idsArray = divId.split(',');
+  const idsArray = divId.map(({value}) => value);
+  console.log("🚀 ~ file: metrics.js ~ line 316 ~ getMeanForAllDivPoints ~ idsArray", idsArray)
   
   const allScores = await Promise.all(
     idsArray.map((id) => {

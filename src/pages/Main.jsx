@@ -17,7 +17,7 @@ import { generateDocument } from "../components/FileContent";
 
 export default function Main() {
   const divSelector = useRef();
-  const [selectedProject, setSelectedProject] = useState("");
+  const [selectedProject, setSelectedProject] = useState(null);
   const [selectedMap, setSelectedMap] = useState("");
   const [selectedDivPoint, setSelectedDivPoint] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,31 +41,18 @@ export default function Main() {
     setSelectedMap('');
   };
 
-  const handleMapSelectChange = (e) => {
-    const mapId = e.target.value;
-    
-    if (mapId.length === 24) {
-      setSelectedMap(mapId);
-    } else {
-      const mapsIdArr = mapId.split(',');
-      setSelectedMap(mapsIdArr); 
-    }
+  const handleMapSelectChange = (value) => {
+    setSelectedMap(value);
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      typeof selectedMap === 'object' && setSelectedDivPoint(divSelector.current[1].value)
-    }, 1000);
-  }, [selectedMap])
-
-  const handleDivPointSelectChange = async (e) => {
-    setSelectedDivPoint(e.target.value)
+  const handleDivPointSelectChange = (value) => {
+    setSelectedDivPoint(value)
   };
 
   useEffect(() => {
     async function getAndSetUsersScore(selectedDivPoint) {
-      if (selectedDivPoint.length === 24) {
-        const usersScore = await executeCalculations(selectedDivPoint);
+      if (selectedDivPoint.length === 1) {
+        const usersScore = await executeCalculations(selectedDivPoint[0].value);
         const sortedUsersScore = usersScore.sort((a, b) => b.score - a.score);
         setUsersScore(sortedUsersScore)
       } else {
@@ -83,7 +70,7 @@ export default function Main() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await api.getMapById(accessToken, selectedMap);
+        const response = await api.getMapById(accessToken, selectedMap.value);
         setMapDetails({ ...response });
       } catch (error) {
         console.log(error);
@@ -100,7 +87,7 @@ export default function Main() {
   return (
     <Box padding={10}>
       <Box display="flex">
-        <ProjectList handleSelectChange={handleSelectChange} />
+        <ProjectList disabled handleSelectChange={handleSelectChange} />
         <Link
           href={`https://app.strateegia.digital/journey/${selectedProject}/map/${firstMap}`}
           target="_blank"
@@ -130,7 +117,6 @@ export default function Main() {
       <Heading as="h3" size="md" mb={3} mt={3}>
         {i18n.t('main.heading')}
       </Heading>
-      {/* [TODO] Add you component here */}
       {mapDetails?.points ? (
         <Box mt={3}>
          

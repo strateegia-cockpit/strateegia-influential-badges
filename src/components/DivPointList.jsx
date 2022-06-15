@@ -1,41 +1,43 @@
 import { useState, useEffect } from "react";
-import { Select } from "@chakra-ui/react";
+import Select from 'react-select';
 import * as api from "strateegia-api";
 import { i18n } from "../translate/i18n";
 
 export default function DivPointList({ mapId, handleSelectChange, innerRef }) {
   const [divPointList, setDivPointList] = useState(null);
+  const [allSelected, setAllSelected] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     async function fetchMapList() {
       try {
         const accessToken = localStorage.getItem("accessToken");
+    
+        const allProjectMaps = await Promise.all(
+          mapId.map(async ({value}) => {
+            const allMapsInfo = await api.getMapById(accessToken, value)
+            return allMapsInfo;
+          })
+        ).then(data => data.flat());  
+
+        const divPoints = allProjectMaps.map(singleMap => getOnlyDivPoints(singleMap));
+        const allDivPoints = setAllDivPointsOption(divPoints.flat())
         
-        if (mapId.length !== 24) {
-
-          const allProjectMaps = await Promise.all(
-            mapId.map(async (id) => {
-              const allMapsInfo = await api.getMapById(accessToken, id)
-              return allMapsInfo;
-            })
-          ).then(data => data.flat());  
-
-          const divPoints = allProjectMaps.map(singleMap => getOnlyDivPoints(singleMap));
-        
-          const allDivPoints = setAllDivPointsOption(divPoints.flat())
-          setDivPointList(allDivPoints);
-
-        } else {
-          const map = await api.getMapById(accessToken, mapId);
-          const divPoints = getOnlyDivPoints(map);
-          const allDivPoints = setAllDivPointsOption(divPoints)
-          setDivPointList(allDivPoints);
-        }
-
+        const divData = [];
+        allDivPoints?.map(divItem => {
+          const data = {
+            label: divItem.title,
+            value: divItem.id
+          };
+          divData.push(data);
+        })
+        setDivPointList(divData);
       } catch (error) {
         console.log(error);
       }
     }
+    setAllSelected(false);
+    setSelected(null);
     fetchMapList();
   }, [mapId]);
 
@@ -45,30 +47,31 @@ export default function DivPointList({ mapId, handleSelectChange, innerRef }) {
   }
 
   function setAllDivPointsOption(divPoints) {
-    const allIds = divPoints.map(({id}) => id);
-    const allOption = {id: allIds, title: i18n.t('selector.list')};
-    divPoints.length > 1 && divPoints.unshift(allOption);
+    const allOption = {id: 0, title: i18n.t('selector.list')};
+    divPoints.unshift(allOption);
     return divPoints;
   }
+
+  const changeSelectAll = () => {
+    handleSelectChange(divPointList.slice(1))
+    setAllSelected(true)
+  };
 
 
   return mapId && (
     <Select
-      placeholder={i18n.t('main.placeholderDiv')}
-      onChange={handleSelectChange}
-      isDisabled={mapId.length === 24 ? false : true}
-      value={mapId.length !== 24 ? divPointList?.[0].id : undefined}
-      ref={innerRef}
-    >
-      {divPointList
-        ? divPointList.map((divPoint) => {
-            return (
-              <option key={divPoint.id} value={divPoint.id}>
-                {divPoint.title}
-              </option>
-            );
-          })
-        : null}
-    </Select>
+      placeholder={i18n.t('main.placeholderDiv')} 
+      options={divPointList}
+      isMulti 
+      value={ allSelected ? divPointList.slice(1) : selected}
+      onChange={ selected => {
+        setSelected(selected)
+        setAllSelected(false)
+        selected.find(option => option.label === i18n.t('selector.list')) ? 
+          changeSelectAll()
+        : handleSelectChange(selected);
+      }} 
+      isSearchable 
+    />
   );
 }

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Select } from '@chakra-ui/react';
+// import { Select } from '@chakra-ui/react';
 import * as api from 'strateegia-api';
 import { i18n } from "../translate/i18n";
+import Select from 'react-select';
 
 export default function MapList({ projectId, handleSelectChange }) {
   const [mapList, setMapList] = useState(null);
+  const [allSelected, setAllSelected] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     setMapList(null)
@@ -14,35 +17,48 @@ export default function MapList({ projectId, handleSelectChange }) {
         const project = await api.getProjectById(accessToken, projectId);
 
         const maps = project.maps;
-        const allIds = maps.map(({id}) => id);
-        const allOption = {id: allIds, title: i18n.t('selector.list')};
+        const allOption = {id: 0, title: i18n.t('selector.list')};
+        maps.unshift(allOption);
         
-        maps.length > 1 && maps.unshift(allOption);
-        setMapList(maps);
+        const mapData = [];
+        maps?.map(mapItem => {
+          const data = {
+            label: mapItem.title,
+            value: mapItem.id
+          };
+          mapData.push(data);
+        })
+
+        setMapList(mapData);
       } catch (error) {
         console.log(error);
       }
     }
+    setAllSelected(false);
+    setSelected(null);
     fetchMapList();
-
-
   }, [projectId]);
 
+  const changeSelectAll = () => {
+    handleSelectChange(mapList.slice(1))
+    setAllSelected(true)
+  };
 
 
-  return projectId ? (
-    <Select placeholder={i18n.t('main.placeholderMap')}  onChange={handleSelectChange}>
-      {mapList
-        ? mapList.map((mapItem, index) => {
-            return (
-              <option key={index} value={mapItem.id}>
-                {mapItem.title}
-              </option>
-            );
-          })
-        : null}
-    </Select>
-  ) : (
-    ''
+  return projectId && (
+    <Select
+      placeholder={i18n.t('main.placeholderMap')} 
+      options={mapList}
+      isMulti 
+      value={ allSelected ? mapList.slice(1) : selected}
+      onChange={ selected => {
+        setSelected(selected);
+        setAllSelected(false)
+        selected.find(option => option.label === i18n.t('selector.list')) ? 
+          changeSelectAll()
+        : handleSelectChange(selected);
+      }} 
+      isSearchable 
+    />  
   );
 }
