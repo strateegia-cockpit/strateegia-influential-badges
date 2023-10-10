@@ -139,7 +139,8 @@ function calculateAuthorScore(author, kitData) {
     f6: 0,
     metrica1: 0,
     metrica2: 0,
-    score: 0
+    score: 0,
+    totalAverage: 0,
   };
 
   const qtd_questoes_respondidas = author.amount_ans_questions;
@@ -254,7 +255,7 @@ function calculateAuthorScore(author, kitData) {
 
   let f5 = 0;
 
-  if (total_replies != 0) {
+  if (total_replies !== 0) {
     f5 = total_inner_replies / total_replies;
   }
 
@@ -290,6 +291,8 @@ function calculateAuthorScore(author, kitData) {
   authorScore.metrica1 = Math.round((metrica1 * 100) / 1.25);
   authorScore.metrica2 = Math.round((metrica2 * 100));
   authorScore.score = Math.round((formulaFinal * 100) / 0.96);
+  const totalAverage = (authorScore.metrica1 + authorScore.metrica2 + authorScore.score) / 3.0;
+  authorScore.totalAverage = totalAverage.toFixed(2);
 
   return authorScore;
 }
@@ -341,7 +344,7 @@ function getResult(allScores, occurrences, divId) {
   return result.flat();
 }
 
-function calculateUserScore(acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, metrica2, score }) {
+function calculateUserScore(acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, metrica2, score, totalAverage }) {
 
   const calculate = (value, key) => {
     return Number(value) + (acc[0]?.[key] || 0)
@@ -358,7 +361,8 @@ function calculateUserScore(acc, { name, f1, f2, f3, f4, f5, f6, id, metrica1, m
     'f6': calculate(f6, 'f6'),
     'metrica1': calculate(metrica1, 'metrica1'),
     'metrica2': calculate(metrica2, 'metrica2'),
-    'score': calculate(score, 'score')
+    'score': calculate(score, 'score'),
+    'totalAverage': calculate(totalAverage, 'totalAverage')
   }]
 }
 
@@ -375,7 +379,8 @@ function calculateUserScoreMean(user, divId) {
     'f6': getMean('f6'),
     'metrica1': getMean('metrica1'),
     'metrica2': getMean('metrica2'),
-    'score': getMean('score')
+    'score': getMean('score'),
+    'totalAverage': getMean('totalAverage')
   }
   return meanUser
 }

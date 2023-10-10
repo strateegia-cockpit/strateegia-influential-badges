@@ -18,6 +18,7 @@ const messages = {
                 th2: 'ação',
                 th3: 'impacto',
                 th4: 'colaboração',
+                th5: 'média',
             },
             selector: {
                 list: 'todos'
