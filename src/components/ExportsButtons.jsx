@@ -5,16 +5,17 @@ import { ButtonExp } from "./ButtonToExport";
 import { approximateNumber } from "../utils/numerHandling";
 
 const transformHeaders = (data) => {
-  return data.map(item => {
-    return {
-      'ação': item.metrica1,
-      'impacto': item.metrica2,
-      'colaboração': item.score,
-      'média': item.totalAverage,
-      'media normalizada': item.normalizedTotalAverage,
-      'média por blocos': approximateNumber(item.normalizedTotalAverage),
-    };
-  });
+ if (data === '') return data;
+ return data.map(item => {
+  return {
+    'ação': item.metrica1,
+    'impacto': item.metrica2,
+    'colaboração': item.score,
+    'média': item.totalAverage,
+    'media normalizada': item.normalizedTotalAverage,
+    'média por blocos': approximateNumber(item.normalizedTotalAverage),
+  };
+});
 };
 
 
