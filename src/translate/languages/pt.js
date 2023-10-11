@@ -19,6 +19,8 @@ const messages = {
                 th3: 'impacto',
                 th4: 'colaboração',
                 th5: 'média',
+                th6: 'média normalizada',
+                th7: 'média normalizada aproximada'
             },
             selector: {
                 list: 'todos'
