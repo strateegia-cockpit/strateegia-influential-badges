@@ -20,7 +20,7 @@ const messages = {
                 th4: 'colaboração',
                 th5: 'média',
                 th6: 'média normalizada',
-                th7: 'média normalizada aproximada'
+                th7: 'média por blocos'
             },
             selector: {
                 list: 'todos'

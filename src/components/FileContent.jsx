@@ -3,13 +3,13 @@ import PizZip from "pizzip";
 import PizZipUtils from "pizzip/utils/index.js";
 import { reportsCockpit } from '../assets/files' 
 import { saveAs } from "file-saver"; 
+import { approximateNumber } from "../utils/numerHandling";
 
 function loadFile(url, callback) {
     PizZipUtils.getBinaryContent(url, callback);
 }
 
 export const generateDocument = (usersScore) => {
-
     loadFile(
         reportsCockpit,
         function (error, content) {
@@ -30,6 +30,9 @@ export const generateDocument = (usersScore) => {
                     'metrica1': user.metrica1,
                     'metrica2': user.metrica2,
                     'score': user.score,
+                    'totalAverage': user.totalAverage,
+                    'normalizedTotalAverage': user.normalizedTotalAverage,
+                    'approximateNumber': approximateNumber(user.normalizedTotalAverage),
                 };
                 const whiteRow = {
                     'hasBlue': false,
@@ -38,6 +41,9 @@ export const generateDocument = (usersScore) => {
                     'metrica1_2': user.metrica1,
                     'metrica2_2': user.metrica2,
                     'score_2': user.score,
+                    'totalAverage_2': user.totalAverage,
+                    'normalizedTotalAverage_2': user.normalizedTotalAverage,
+                    'approximateNumber_2': approximateNumber(user.normalizedTotalAverage),
                 };
 
                 return i % 2 == 0 ? blueRow : whiteRow;
