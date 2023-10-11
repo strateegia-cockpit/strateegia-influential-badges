@@ -26,7 +26,21 @@ export const THeader = ({text, weight, alignment, width}) => {
 }
 
 const UserTable = ({usersScore}) => {
-   
+  function approximateNumber(inputNumber) {
+      const roundedNumber = Math.round(inputNumber);
+      if (roundedNumber >= 0 && roundedNumber <= 25) {
+          return 25;
+      } else if (roundedNumber >= 26 && roundedNumber <= 50) {
+          return 50;
+      } else if (roundedNumber >= 51 && roundedNumber <= 75) {
+          return 75;
+      } else if (roundedNumber > 75) {
+          return 100;
+      } else {
+          console.error('Input number is out of valid range (below 0)');
+          return null; // or handle the error as appropriate for your application
+      }
+    }
 
     return (
         <Table variant='striped' w='60vw'>
@@ -37,6 +51,8 @@ const UserTable = ({usersScore}) => {
                 <THeader text={i18n.t('userTable.th3')}/>
                 <THeader text={i18n.t('userTable.th4')}/>
                 <THeader text={i18n.t('userTable.th5')} weight={800}/>
+                <THeader text={i18n.t('userTable.th6')} weight={800}/>
+                <THeader text={i18n.t('userTable.th7')} weight={800}/>
             </Tr>
             </Thead>
             <Tbody>
@@ -49,7 +65,9 @@ const UserTable = ({usersScore}) => {
                         <Td key={user.metrica1 + '' + user.id} textAlign='center'>{user.metrica1} %</Td>
                         <Td key={user.id + user.metrica2 + user.id} textAlign='center'>{user.metrica2} %</Td>
                         <Td key={user.id + user.score} textAlign='center'>{user.score} %</Td>
-                        <Td key={user.id + '' + user.totalAverage} textAlign='center'> {user.totalAverage} %</Td>
+                        <Td key={user.id + '' + user.totalAverage} textAlign='center' px={4}>{user.totalAverage} %</Td>
+                        <Td key={user.id + '' + user.normalizedTotalAverage} textAlign='center'>{user.normalizedTotalAverage}</Td>
+                        <Td key={user.id + '' + user.normalizedTotalAverage + '' + user.id} textAlign='center'>{approximateNumber(user.normalizedTotalAverage)}</Td>
                     </Tr>
                 )
             )}

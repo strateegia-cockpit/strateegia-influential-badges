@@ -49,16 +49,33 @@ export default function Main() {
     setSelectedDivPoint(value)
   };
 
+  function normalizeAuthorScores(authorsScores) {
+    const highestTotalAverage = Math.max(...authorsScores.map(score => parseFloat(score.totalAverage)));
+    
+    // Handle the edge case where highest totalAverage is zero
+    if (highestTotalAverage === 0) {
+      console.warn('Highest totalAverage is zero. Normalization might not be meaningful.');
+      return authorsScores; // you might want to handle this case differently
+    }
+  
+    return authorsScores.map(score => {
+      const normalizedTotalAverage = ((parseFloat(score.totalAverage) / highestTotalAverage) * 100).toFixed(2);
+      return { ...score, normalizedTotalAverage };
+    });
+  }
+
   useEffect(() => {
     async function getAndSetUsersScore(selectedDivPoint) {
       if (selectedDivPoint.length === 1) {
         const usersScore = await executeCalculations(selectedDivPoint[0].value);
-        const sortedUsersScore = usersScore.sort((a, b) => b.score - a.score);
-        setUsersScore(sortedUsersScore)
+        const normalizedUsersScore = normalizeAuthorScores(usersScore);
+        const sortedNormalizedUsersScore = normalizedUsersScore.sort((a, b) => b.score - a.score);
+        setUsersScore(sortedNormalizedUsersScore)
       } else {
         const usersScore = await getMeanForAllDivPoints(selectedDivPoint);
-        const sortedUsersScore = usersScore.sort((a, b) => b.score - a.score);
-        setUsersScore(sortedUsersScore)
+        const normalizedUsersScore = normalizeAuthorScores(usersScore);
+        const sortedNormalizedUsersScore = normalizedUsersScore.sort((a, b) => b.score - a.score);
+        setUsersScore(sortedNormalizedUsersScore)
       }
     }
 
