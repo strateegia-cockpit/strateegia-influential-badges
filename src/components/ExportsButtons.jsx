@@ -8,6 +8,7 @@ const transformHeaders = (data) => {
  if (data === '') return data;
  return data.map(item => {
   return {
+    'nome': item.name,
     'ação': item.metrica1,
     'impacto': item.metrica2,
     'colaboração': item.score,

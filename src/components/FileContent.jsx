@@ -46,7 +46,7 @@ export const generateDocument = (usersScore) => {
                     'approximateNumber_2': approximateNumber(user.normalizedTotalAverage),
                 };
 
-                return i % 2 == 0 ? blueRow : whiteRow;
+                return i % 2 === 0 ? blueRow : whiteRow;
             
             });
 
